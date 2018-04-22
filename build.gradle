@@ -10,6 +10,7 @@ plugins {
     id 'java'
     id 'java-gradle-plugin'
     id 'maven-publish'
+    id 'net.researchgate.release' version '2.6.0'
 }
 
 repositories {
