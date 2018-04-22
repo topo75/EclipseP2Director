@@ -1,0 +1,6 @@
+**/.idea
+**/.gradle
+**/build
+Bootstrapper/bootstrappers/*/Eclipse
+!gradle-wrapper.jar
+.gradletasknamecache

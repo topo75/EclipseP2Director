@@ -1,0 +1,3 @@
+rootProject.name = 'EclipseP2Director'
+include 'Bootstrapper'
+

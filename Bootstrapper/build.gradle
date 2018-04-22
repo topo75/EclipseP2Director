@@ -1,0 +1,101 @@
+import groovy.json.StringEscapeUtils
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath group: 'com.github.topo75', name: 'EclipseP2Director', version: '0.1'
+        classpath group: 'com.github.topo75.EclipseP2Director', name: 'com.github.topo75.EclipseP2Director.gradle.plugin', version: '0.1'
+        classpath 'de.undercouch:gradle-download-task:3.4.2'
+    }
+
+}
+
+apply plugin: 'com.github.topo75.EclipseP2Director'
+apply plugin: 'de.undercouch.download'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+}
+
+def updateSite = "http://download.eclipse.org/releases/oxygen/"
+def compositeContentName = "compositeContent.jar"
+def compositeContent = new File(buildDir, compositeContentName)
+
+task checkForUpdates(type:Download) {
+    group "director"
+
+    outputs.files compositeContent
+
+    src "${updateSite}${compositeContentName}"
+    dest compositeContent
+    overwrite false
+    quiet false
+    onlyIfModified true
+}
+
+task createBootstrapper {
+    description "creates the bootstrapper application"
+    group "director"
+}
+
+def bootstrapBaseDir = file('bootstrappers')
+
+project.ext.EclipseP2BootstrapperBaseUrl = file('bootstrappers').toURI().toURL()
+
+createTasks(new File(bootstrapBaseDir, 'macosx'), 'Eclipse.app/Contents/Eclipse', 'MACOSX', 'COCOA', 'X86_64')
+createTasks(new File(bootstrapBaseDir, 'linux_x86'), '', 'LINUX', 'GTK', 'X86')
+createTasks(new File(bootstrapBaseDir, 'linux_x86_64'), '', 'LINUX', 'GTK', 'X86_64')
+createTasks(new File(bootstrapBaseDir, 'win_x86'), '', 'WINDOWS', 'WINDOWS', 'X86')
+createTasks(new File(bootstrapBaseDir, 'win_x86_64'), '', 'WINDOWS', 'WINDOWS', 'X86_64')
+
+def createTasks(File target, subDir, osPar, wsPar, archPar) {
+    def eclipseBaseDir = new File(target, 'Eclipse')
+    def destinationPath = new File(eclipseBaseDir, subDir)
+
+    task "${target.name}_director" {
+        it.dependsOn(checkForUpdates)
+        inputs.files checkForUpdates.outputs
+        outputs.dir destinationPath
+        doLast {
+            delete(eclipseBaseDir)
+            director {
+                destination = destinationPath
+                installIU = "org.eclipse.platform.ide"
+                profile = "SDKProfile"
+                repository = "http://download.eclipse.org/releases/oxygen/"
+
+                p2 {
+                    os=osPar
+                    ws=wsPar
+                    arch=archPar
+                }
+            }
+            def eclipseProduct = new File(destinationPath, '.eclipseproduct')
+            if (!eclipseProduct.exists()) {
+                throw new IllegalStateException('.eclipseproduct not found in ${destinationDir}')
+            }
+        }
+
+    }
+
+    task "${target.name}_zip" (type: Zip) {
+        it.dependsOn("${target.name}_director")
+        createBootstrapper.dependsOn(it)
+
+        inputs.files destinationPath
+        outputs.files new File(target, 'Eclipse.zip')
+        destinationDir target
+        archiveName 'Eclipse.zip'
+        from new File(target, 'Eclipse')
+    }
+}
+

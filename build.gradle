@@ -1,0 +1,45 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+}
+plugins {
+    id 'groovy'
+    id 'java'
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile 'de.undercouch:gradle-download-task:3.4.2'
+    testCompile 'junit:junit:4.12'
+}
+
+gradlePlugin {
+
+    plugins {
+        simplePlugin {
+            id = 'com.github.topo75.EclipseP2Director'
+            implementationClass = 'com.github.topo75.eclipsep2director.EclipseP2Plugin'
+        }
+    }
+}
+
+group 'com.github.topo75'
+version '0.1'
+
+publishing {
+    publications {
+        eclipseP2(MavenPublication) {
+            from components.java
+        }
+    }
+}
