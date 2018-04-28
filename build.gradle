@@ -35,7 +35,6 @@ gradlePlugin {
 }
 
 group 'com.github.topo75'
-version '0.1'
 
 publishing {
     publications {
