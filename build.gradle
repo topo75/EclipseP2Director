@@ -85,6 +85,16 @@ task sourceJar(type: Jar) {
     classifier "sources"
 }
 
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+}
+
 publishing {
     publications {
         eclipseP2(MavenPublication) {
@@ -94,6 +104,11 @@ publishing {
             groupId group
             artifactId 'EclipseP2Director'
             version currentVersion
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'A gradle plugin for running the eclipse p2 director application')
+                root.children().last() + pomConfig
+            }
         }
     }
 }
