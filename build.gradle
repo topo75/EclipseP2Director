@@ -23,6 +23,7 @@ repositories {
 
 dependencies {
     compile 'de.undercouch:gradle-download-task:3.4.2'
+    runtime 'org.apache.httpcomponents:httpclient:4.5.5'
     testCompile 'junit:junit:4.12'
 }
 
