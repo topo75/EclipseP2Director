@@ -67,7 +67,7 @@ class DownloadEclipseBootstrapper {
         if (project.hasProperty('EclipseP2BootstrapperBaseUrl')) {
             bootstrapperUrl = project.property('EclipseP2BootstrapperBaseUrl')
         } else {
-            bootstrapperUrl = 'https://github.com/topo75/EclipseP2Director/raw/master/Bootstrapper/bootstrappers'
+            bootstrapperUrl = "https://github.com/topo75/EclipseP2Director/raw/${VersionInfo.version}/Bootstrapper/bootstrappers"
         }
 
         String downloadUrl = "${bootstrapperUrl}/${current.subDir}/${eclipseZipName}"

@@ -2,5 +2,6 @@
 **/.gradle
 **/build
 Bootstrapper/bootstrappers/*/Eclipse
+src/main/groovy/com/github/topo75/eclipsep2director/VersionInfo.groovy
 !gradle-wrapper.jar
 .gradletasknamecache

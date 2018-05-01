@@ -9,7 +9,9 @@ plugins {
     id 'groovy'
     id 'java'
     id 'java-gradle-plugin'
+    id 'java-library'
     id 'maven-publish'
+    id "com.jfrog.bintray" version "1.7.3"
     id 'net.researchgate.release' version '2.6.0'
 }
 
@@ -35,11 +37,85 @@ gradlePlugin {
 }
 
 group 'com.github.topo75'
+def currentVersion = version
+
+task createVersionInfo() {
+    def versionInfoFile = file('src/main/groovy/com/github/topo75/eclipsep2director/VersionInfo.groovy')
+
+    inputs.property('Version', currentVersion)
+    outputs.files versionInfoFile
+
+    doLast {
+        def versionString = 'master'
+        if (currentVersion ==~ /\d+\.\d+\.\d+/) {
+            versionString = currentVersion
+        }
+
+        versionInfoFile.withWriter {
+            it << """
+package com.github.topo75.eclipsep2director
+
+class VersionInfo {
+    static final String version = '${versionString}'
+    static String getVersion() {
+        version
+    }
+}
+"""
+        }
+    }
+}
+
+compileJava.dependsOn(createVersionInfo)
+compileGroovy.dependsOn(createVersionInfo)
+
+def javaApiUrl = 'http://docs.oracle.com/javase/1.7.0/docs/api/'
+def groovyApiUrl = 'http://groovy.codehaus.org/gapi/'
+tasks.withType(Javadoc) {
+    options.links(javaApiUrl, groovyApiUrl)
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier "sources"
+}
 
 publishing {
     publications {
         eclipseP2(MavenPublication) {
             from components.java
+            artifact sourceJar
+            artifact javadocJar
+            groupId group
+            artifactId 'EclipseP2Director'
+            version currentVersion
+        }
+    }
+}
+
+def bintrayuser = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+def bintraykey = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_KEY')
+println "bintray user '${bintrayuser}'"
+bintray {
+    user = bintrayuser
+    key = bintraykey
+    publications = ['eclipseP2']
+    pkg {
+        repo = 'github'
+        name = 'EclipseP2Director'
+        userOrg = bintrayuser
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/topo75/EclipseP2Director.git'
+        version {
+            name = currentVersion
+            released = new Date()
+            vcsTag = currentVersion
+            attributes = ['gradle-plugin': "${group}:EclipseP2Director:eclipse-p2-director-plugin"]
         }
     }
 }
