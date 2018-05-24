@@ -2,13 +2,15 @@ import groovy.json.StringEscapeUtils
 
 buildscript {
     repositories {
-        mavenLocal()
+        //mavenLocal()
         mavenCentral()
         jcenter()
+        maven {
+            url "https://dl.bintray.com/topo75/github/"
+        }
     }
     dependencies {
-        classpath group: 'com.github.topo75', name: 'EclipseP2Director', version: '0.1'
-        classpath group: 'com.github.topo75.EclipseP2Director', name: 'com.github.topo75.EclipseP2Director.gradle.plugin', version: '0.1'
+        classpath group: 'com.github.topo75', name: 'EclipseP2Director', version: '0.1.1'
         classpath 'de.undercouch:gradle-download-task:3.4.2'
     }
 
@@ -18,7 +20,7 @@ apply plugin: 'com.github.topo75.EclipseP2Director'
 apply plugin: 'de.undercouch.download'
 
 repositories {
-    mavenLocal()
+    //mavenLocal()
     mavenCentral()
     jcenter()
 }
